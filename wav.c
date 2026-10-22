@@ -80,7 +80,7 @@ int wavLoad(WavData *out, const char *path) {
     }
 
     if (read_u16(f, &out->channels) != 0) goto done;
-    if(channels == 0){
+    if(out->channels == 0){
         goto done;
     }
     if (read_u32(f, &out->sampleRate) != 0) goto done;
