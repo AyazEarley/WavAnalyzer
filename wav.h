@@ -10,6 +10,8 @@ typedef struct {
     uint16_t bitDepth;
     float *samples;
 
+    size_t numFrames;
+
 } WavData;
 
 
