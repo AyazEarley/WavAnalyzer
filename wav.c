@@ -27,6 +27,8 @@ static int read_u32(FILE *f, uint32_t *out) {
 }
 
 int wavLoad(WavData *out, const char *path) {
+    memset(out, 0, sizeof *out);
+
     int retCode = -1;
     uint8_t tag[4];
     uint32_t size;
@@ -78,6 +80,9 @@ int wavLoad(WavData *out, const char *path) {
     }
 
     if (read_u16(f, &out->channels) != 0) goto done;
+    if(channels == 0){
+        goto done;
+    }
     if (read_u32(f, &out->sampleRate) != 0) goto done;
 
     if (read_u32(f, &byteRate) != 0) goto done;
@@ -89,11 +94,14 @@ int wavLoad(WavData *out, const char *path) {
         goto done;
     }
 
-    if (fmtSize > 16) {
+    if (fmtSize != 16) {
         fseek(f, fmtSize - 16, SEEK_CUR);
     }
 
     if (fread(dataid, 1, 4, f) != 4) goto done;
+    if(dataid != "data"){
+        goto done;
+    }
     printf("%.4s\n", dataid); 
     if (read_u32(f, &dataSize) != 0) goto done;
     if (dataSize > MAX_CHUNK_SIZE) goto done;
