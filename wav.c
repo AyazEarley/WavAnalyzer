@@ -32,6 +32,13 @@ int wavLoad(WavData *out, const char *path) {
     uint32_t size;
     uint8_t id[4];
 
+    uint32_t chunkSize;
+    uint16_t format;
+
+    //throw away variables
+    uint32_t byteRate;
+    uint16_t blockAlign;
+
     FILE *f = fopen(path, "rb");
     if(!f){
         return -1;
@@ -51,7 +58,27 @@ int wavLoad(WavData *out, const char *path) {
 
     if (fread(id, 1, 4, f) != 4) goto done;
     printf("%.4s\n", id); 
-    
+
+    if (read_u32(f, &chunkSize) != 0) goto done;
+    if(chunkSize > MAX_CHUNK_SIZE){
+        printf("exceeded max chunk size :( \n");
+        goto done;
+    }
+
+    if (read_u16(f, &format) != 0) goto done;
+    printf("format: %u\n", format);
+    if(format != 1){
+        printf("file is not PCM \n");
+        goto done;
+    }
+
+    if (read_u16(f, &out->channels) != 0) goto done;
+    if (read_u32(f, &out->sampleRate) != 0) goto done;
+
+    if (read_u32(f, &byteRate) != 0) goto done;
+    if (read_u16(f, &blockAlign) != 0) goto done;
+
+    if (read_u16(f, &out->bitDepth) != 0) goto done;
 
     retCode = 0;
     done:
