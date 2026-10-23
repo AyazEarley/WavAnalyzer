@@ -26,6 +26,24 @@ float dspRms(const float *x, size_t n){
     return (float)total;
 }
 
+size_t dspZeroCrosses(const float *x, size_t N) {
+    if (x == NULL) return 0;
+
+    size_t count = 0;
+    int prevSign = 0;
+
+    for (size_t i = 0; i < N; i++) {
+        float s = x[i];
+        if (s == 0.0f) continue;
+
+        int sign = (s > 0.0f) ? 1 : -1;
+        if (prevSign != 0 && sign != prevSign) count++;
+        prevSign = sign;
+    }
+
+    return count;
+}
+
 void dspNaiveDFT(const float *x, size_t N, float *re, float *im){
     for(size_t m = 0; m < N; m++){
         re[m] = 0;
@@ -79,7 +97,6 @@ void dspRecursiveFFT(const float *in, size_t N, float *re, float *im){
         im[k] = evenIm[k] + tIm;
         im[k + N/2] = evenIm[k] - tIm;
     }
-
 
     free(evens);
     free(odds);
