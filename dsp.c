@@ -1,5 +1,6 @@
 #include "dsp.h"
 #include <math.h>
+#include <stdlib.h>
 
 #define PI 3.14159265358979323846
 
@@ -36,3 +37,54 @@ void dspNaiveDFT(const float *x, size_t N, float *re, float *im){
     }
 }
 
+void dspRecursiveFFT(const float *in, size_t N, float *re, float *im){
+    if (N == 1) { re[0] = in[0]; im[0] = 0; return; }
+
+    float *evens = malloc(N / 2 * sizeof *evens);
+    float *odds = malloc(N / 2 * sizeof *odds);
+
+    float *evenRe = malloc(N / 2 * sizeof *evens);
+    float *evenIm = malloc(N / 2 * sizeof *evens);
+    float *oddRe = malloc(N / 2 * sizeof *odds);
+    float *oddIm = malloc(N / 2 * sizeof *odds);
+
+    assert(evens && odds && evenRe && evenIm && oddRe && oddIm);
+
+    int evenIndex = 0;
+    int oddIndex = 0;
+    for(size_t i = 0; i < N; i++){
+        if(i % 2 == 0){
+            evens[evenIndex] = in[i];
+            evenIndex++;
+        }
+        else{
+            odds[oddIndex] = in[i];
+            oddIndex++;
+        }
+    }
+
+    dspRecursiveFFT(evens, N / 2, evenRe, evenIm);
+    dspRecursiveFFT(odds, N / 2, oddRe, oddIm);
+    
+
+    for(size_t k = 0; k < N/2; k++){
+        float angle = -2 * PI * (float)k / N;
+
+        float tRe = cos(angle) * oddRe[k] - sin(angle) * oddIm[k];
+        float tIm = cos(angle) * oddIm[k] + sin(angle) * oddRe[k];
+
+        re[k] = evenRe[k] + tRe;
+        re[k + N/2] = evenRe[k] - tRe;   
+
+        im[k] = evenIm[k] + tIm;
+        im[k + N/2] = evenIm[k] - tIm;
+    }
+
+
+    free(evens);
+    free(odds);
+    free(evenIm);
+    free(evenRe);
+    free(oddIm);
+    free(oddRe);
+}
