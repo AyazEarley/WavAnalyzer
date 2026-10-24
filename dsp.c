@@ -105,3 +105,46 @@ void dspRecursiveFFT(const float *in, size_t N, float *re, float *im){
     free(oddIm);
     free(oddRe);
 }
+
+void dspInPlaceFFT(const float *in, size_t N, float *re, float *im){
+    if (N == 0) return;
+    assert((N & (N - 1)) == 0);
+
+    for (size_t i = 0; i < N; i++) {
+        re[i] = in[i];
+        im[i] = 0.0f;
+    }
+
+    for (size_t i = 1, j = 0; i < N; i++) {
+        size_t bit = N >> 1;
+        for (; j & bit; bit >>= 1) j ^= bit;
+        j ^= bit;
+
+        if (i < j) {
+            float tr = re[i]; re[i] = re[j]; re[j] = tr;
+            float ti = im[i]; im[i] = im[j]; im[j] = ti;
+        }
+    }
+
+    for (size_t len = 2; len <= N; len <<= 1) {
+        size_t half = len >> 1;
+
+        for (size_t k = 0; k < half; k++) {
+            double angle = -2.0 * PI * (double)k / (double)len;
+            float wr = (float)cos(angle);
+            float wi = (float)sin(angle);
+
+            for (size_t i = k; i < N; i += len) {
+                size_t j = i + half;
+
+                float tRe = wr * re[j] - wi * im[j];
+                float tIm = wr * im[j] + wi * re[j];
+
+                re[j] = re[i] - tRe;
+                im[j] = im[i] - tIm;
+                re[i] = re[i] + tRe;
+                im[i] = im[i] + tIm;
+            }
+        }
+    }
+}
