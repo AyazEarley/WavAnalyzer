@@ -5,8 +5,8 @@ I'm taking digitial signal processing right now, and in order to solidify my kno
 What I achieved:
 
 - Safely read and parsed a .wav file, byte by byte
-- Implement basic DSP algorithms like peak amplitude, RMS and zero-crossing
-- Implement a naiveDFT
-- Implement an FFT
-- Implement an in place FFT
-- Hand code everything myself, no libraries, no LLMs
+- Implemented basic DSP algorithms like peak amplitude, RMS and zero-crossing
+- Implemented a naiveDFT
+- Implemented an FFT
+- Implemented an in place FFT
+- Hand coded everything myself, no libraries, no LLMs
